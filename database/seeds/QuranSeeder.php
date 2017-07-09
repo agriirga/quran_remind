@@ -27,7 +27,6 @@ class QuranSeeder extends Seeder
             'ayat' => 'required',
         ];
 
-
         $i= 0;
         foreach($rows as $row)
         {
@@ -92,9 +91,8 @@ class QuranSeeder extends Seeder
             }
             $i++;   
         }
-
         
-    // run verse
+    // run arabic verse
     $rows = Excel::selectSheetsByIndex(0)->load('/public/seeder_file/arabic.xlsx', function($reader){
             //options
         })->get();
@@ -115,47 +113,7 @@ class QuranSeeder extends Seeder
             {
                 continue;
             }
-    
-            try{
-                $ayat = new IndonesianVerse();
-                $ayat->surah_id = $row['surah'];
-                $ayat->ayah_no = $row['verse'];
-                $ayat->verse = $row['arab'];
-                $ayat->save();                
-            } 
 
-            catch(Exception $e){
-                 //ada yg sn nya double dd()
-                dd($row['surah'], $row['verse']);
-                continue;
-            }
-            $i++;   
-        }
-
-
-    // arabic verse
-
-    $rows = Excel::selectSheetsByIndex(0)->load('/public/seeder_file/arabic.xlsx', function($reader){
-            //options
-        })->get();
-        //dd($rows);
-
-        $rowRules = [
-            'surah' => 'required',
-            'verse' => 'required',
-            'arab' => 'required',
-        ];
-
-        $i= 0;
-        foreach($rows as $row)
-        {
-            $validator = Validator::make($row->toArray(), $rowRules);
-            
-            if($validator->fails())
-            {
-                continue;
-            }
-    
             try{
                 $ayat = new ArabicVerse();
                 $ayat->surah_id = $row['surah'];
@@ -165,11 +123,11 @@ class QuranSeeder extends Seeder
             } 
 
             catch(Exception $e){
-                 //ada yg sn nya double dd()
                 dd($row['surah'], $row['verse']);
                 continue;
             }
             $i++;   
         }
+
     }
 }

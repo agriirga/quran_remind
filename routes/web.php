@@ -18,4 +18,6 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/random_ayat', 'RandomAyatController@randomize');
+Route::get('/random_ayat', 'QuranController@randomAyat');
+Route::get('/get_full_surat/{surat}', 'QuranController@fullSurat');
+Route::get('/get_specific_ayat/{surat}/{ayat}','QuranController@specificAyat');
