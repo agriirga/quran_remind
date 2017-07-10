@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\QuranSurat;
 use App\ArabicVerse;
 use App\IndonesianVerse;
+use App\Mail\AyatSendMail;
+use Illuminate\Support\Facades\Mail;
 
 class QuranController extends Controller
 {
@@ -66,6 +68,7 @@ class QuranController extends Controller
 
         $indonesian_ayat = $complete_ayat;
 
+        Mail::to('agriie07@gmail.com')->send(new AyatSendMail($indonesian_ayat,$ayat_surat, $arabic_ayat));
         return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));
     }
 
