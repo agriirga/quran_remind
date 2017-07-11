@@ -10,14 +10,16 @@ use App\Mail\AyatSendMail;
 use Illuminate\Support\Facades\Mail;
 use App\Services\AyatServices;
 use App\User;
+use Illuminate\Support\Facades\Auth;
 
 class QuranController extends Controller
 {
-    public function specificAyat($surat,$ayat){
+    public function specificAyat($surat,$ayat, AyatServices $ayat_svc){
+        $user_mail = Auth::user()->email;
         $index_ayat = IndonesianVerse::select('id')->where('surah_id',$surat)->where('ayah_no',$ayat)->first();
-        return $this->getSpecificAyat($index_ayat->id);
+        return $ayat_svc->getSpecificAyat($index_ayat->id, $user_mail,1);
     }
-
+/*
     public function getSpecificAyat($index)
     {        
         $start = $index;
@@ -71,14 +73,13 @@ class QuranController extends Controller
         Mail::to($mail_to)->send(new AyatSendMail($indonesian_ayat,$ayat_surat, $arabic_ayat));
         return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));
     }
-
+*/
     public function randomAyat(AyatServices $ayat_svc)
     {
-        $users = User::where('email', '<>','')->get();
-        foreach ($users as $user){
-            $ayat_svc->randomUserAyat($user->id);
-        }
+        $user_id = Auth::user()->id;
+        return $ayat_svc->randomUserAyat($user_id,1);
     }
+
 /*  move to AyatServices
     public function getIndonesian($ayat){
         $ayat = IndonesianVerse::where('id',$ayat)->first();

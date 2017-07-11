@@ -11,16 +11,16 @@ use App\Mail\AyatSendMail;
 
 class AyatServices
 {
-    public function randomUserAyat($user_id)
+    public function randomUserAyat($user_id,  $is_need_view)
     {
         $user =  User::find($user_id)->first();
-        //dd($user->email);
         $index = rand(1,6236);
-        $this->getSpecificAyat($index, $user->email);
+        return $this->getSpecificAyat($index, $user->email, $is_need_view);
     }
 
-    public function getSpecificAyat($index,$mail_to)
+    public function getSpecificAyat($index,$mail_to,$is_need_view)
     {        
+        //dd($is_need_view);
         $start = $index;
         $end = $index;
 
@@ -58,20 +58,26 @@ class AyatServices
 
         $arabic_ayat = $this->getRangeArabic($start,$end);
         $surat = IndonesianVerse::select('surah_id')->where('id', $index)->first();
-        //dd($surat_id);
         $quran_surat = QuranSurat::select('id','nama_surat')->where('id', $surat->surah_id)->first();
         $first_ayat = IndonesianVerse::select('ayah_no')->where('id',$start)->first();
         $last_ayat = IndonesianVerse::select('ayah_no')->where('id',$end)->first();
-        //dd($start,$end,$quran_surat,$first_ayat, $complete_ayat,$last_ayat);
-        
+       
         if ($start != $end)
             $ayat_surat = 'QS : ' . $quran_surat->nama_surat . '[' . $quran_surat->id .']' . ' , ayat:' . $first_ayat->ayah_no . '-' . $last_ayat->ayah_no;
         else
             $ayat_surat = 'QS : ' . $quran_surat->nama_surat . '[' . $quran_surat->id .']' . ' , ayat:' . $first_ayat->ayah_no;
 
         $indonesian_ayat = $complete_ayat;
-
-        Mail::to($mail_to)->send(new AyatSendMail($indonesian_ayat,$ayat_surat, $arabic_ayat));
+        
+        try{
+            Mail::to($mail_to)->send(new AyatSendMail($indonesian_ayat,$ayat_surat, $arabic_ayat));
+        } catch(Exception $e){
+            console.log('error', $e);
+        }
+        
+        if ($is_need_view){
+            return view('ayat.show')->with(compact('arabic_ayat','ayat_surat','indonesian_ayat'));
+        }
     }
 
     public function getIndonesian($ayat){
