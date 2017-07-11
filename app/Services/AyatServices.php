@@ -1,23 +1,25 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Services;
 
-use Illuminate\Http\Request;
+use App\User;
 use App\QuranSurat;
 use App\ArabicVerse;
 use App\IndonesianVerse;
-use App\Mail\AyatSendMail;
 use Illuminate\Support\Facades\Mail;
-use App\Services\AyatServices;
+use App\Mail\AyatSendMail;
 
-class QuranController extends Controller
+class AyatServices
 {
-    public function specificAyat($surat,$ayat){
-        $index_ayat = IndonesianVerse::select('id')->where('surah_id',$surat)->where('ayah_no',$ayat)->first();
-        return $this->getSpecificAyat($index_ayat->id);
+    public function randomUserAyat($user_id)
+    {
+        $user =  User::find($user_id)->first();
+        //dd($user->email);
+        $index = rand(1,6236);
+        $this->getSpecificAyat($index, $user->email);
     }
 
-    public function getSpecificAyat($index)
+    public function getSpecificAyat($index,$mail_to)
     {        
         $start = $index;
         $end = $index;
@@ -70,14 +72,7 @@ class QuranController extends Controller
         $indonesian_ayat = $complete_ayat;
 
         Mail::to($mail_to)->send(new AyatSendMail($indonesian_ayat,$ayat_surat, $arabic_ayat));
-        return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));
-    }
-
-    public function randomAyat()
-    {
-        //$user = User::where('id', $user_id)->first();
-        $random_index  = rand(1,6236);       
-        return $this->getSpecificAyat($random_index);
+        //return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));
     }
 
     public function getIndonesian($ayat){
@@ -94,27 +89,5 @@ class QuranController extends Controller
     public function getRangeIndonesian($start,$end){ 
         $ayats = IndonesianVerse::select('verse')->whereBetween('id',[$start,$end])->get();
         return $ayats;
-    }    
-    
-    public function fullSurat($id){
-        $quran_surat = QuranSurat::select('id','nama_surat','jumlah_ayat')->where('id',$id)->first();
-        $jumlah_ayat = $quran_surat->jumlah_ayat;
-        
-        $first_ayat =  IndonesianVerse::select('id')->where ('surah_id',$id)->where('ayah_no', 1)->first();
-        $last_ayat =  IndonesianVerse::select('id')->where ('surah_id',$id)->where('ayah_no', $jumlah_ayat)->first();
-
-        $indonesian_verse= $this->getRangeIndonesian($first_ayat->id,$last_ayat->id);
-        $indonesian_ayat = null;
-
-        for ($i = 1; $i<= $jumlah_ayat-1 ; $i++)
-        {   
-            $ayat = $indonesian_verse->pluck('verse')->get($i);
-            $indonesian_ayat = $indonesian_ayat . $ayat;
-        }
-
-        $arabic_ayat = $this->getRangeArabic($first_ayat->id,$last_ayat->id);
-        $ayat_surat = 'QS : ' . $quran_surat->nama_surat . '[' . $quran_surat->id .']' . ' , ayat: 1 -'   . $quran_surat->jumlah_ayat;
-
-        return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));
-    }
+    } 
 }
