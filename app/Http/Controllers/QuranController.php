@@ -9,6 +9,7 @@ use App\IndonesianVerse;
 use App\Mail\AyatSendMail;
 use Illuminate\Support\Facades\Mail;
 use App\Services\AyatServices;
+use App\User;
 
 class QuranController extends Controller
 {
@@ -56,11 +57,9 @@ class QuranController extends Controller
 
         $arabic_ayat = $this->getRangeArabic($start,$end);
         $surat = IndonesianVerse::select('surah_id')->where('id', $index)->first();
-        //dd($surat_id);
         $quran_surat = QuranSurat::select('id','nama_surat')->where('id', $surat->surah_id)->first();
         $first_ayat = IndonesianVerse::select('ayah_no')->where('id',$start)->first();
         $last_ayat = IndonesianVerse::select('ayah_no')->where('id',$end)->first();
-        //dd($start,$end,$quran_surat,$first_ayat, $complete_ayat,$last_ayat);
         
         if ($start != $end)
             $ayat_surat = 'QS : ' . $quran_surat->nama_surat . '[' . $quran_surat->id .']' . ' , ayat:' . $first_ayat->ayah_no . '-' . $last_ayat->ayah_no;
@@ -73,13 +72,14 @@ class QuranController extends Controller
         return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));
     }
 
-    public function randomAyat()
+    public function randomAyat(AyatServices $ayat_svc)
     {
-        //$user = User::where('id', $user_id)->first();
-        $random_index  = rand(1,6236);       
-        return $this->getSpecificAyat($random_index);
+        $users = User::where('email', '<>','')->get();
+        foreach ($users as $user){
+            $ayat_svc->randomUserAyat($user->id);
+        }
     }
-
+/*  move to AyatServices
     public function getIndonesian($ayat){
         $ayat = IndonesianVerse::where('id',$ayat)->first();
         $potongan_ayat = $ayat->verse;
@@ -95,15 +95,15 @@ class QuranController extends Controller
         $ayats = IndonesianVerse::select('verse')->whereBetween('id',[$start,$end])->get();
         return $ayats;
     }    
-    
-    public function fullSurat($id){
+  */  
+    public function fullSurat($id, AyatServices $ayat_svc){
         $quran_surat = QuranSurat::select('id','nama_surat','jumlah_ayat')->where('id',$id)->first();
         $jumlah_ayat = $quran_surat->jumlah_ayat;
         
         $first_ayat =  IndonesianVerse::select('id')->where ('surah_id',$id)->where('ayah_no', 1)->first();
         $last_ayat =  IndonesianVerse::select('id')->where ('surah_id',$id)->where('ayah_no', $jumlah_ayat)->first();
 
-        $indonesian_verse= $this->getRangeIndonesian($first_ayat->id,$last_ayat->id);
+        $indonesian_verse= $ayat_svc->getRangeIndonesian($first_ayat->id,$last_ayat->id);
         $indonesian_ayat = null;
 
         for ($i = 1; $i<= $jumlah_ayat-1 ; $i++)
@@ -112,7 +112,7 @@ class QuranController extends Controller
             $indonesian_ayat = $indonesian_ayat . $ayat;
         }
 
-        $arabic_ayat = $this->getRangeArabic($first_ayat->id,$last_ayat->id);
+        $arabic_ayat = $ayat_svc->getRangeArabic($first_ayat->id,$last_ayat->id);
         $ayat_surat = 'QS : ' . $quran_surat->nama_surat . '[' . $quran_surat->id .']' . ' , ayat: 1 -'   . $quran_surat->jumlah_ayat;
 
         return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));

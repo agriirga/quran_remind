@@ -72,7 +72,6 @@ class AyatServices
         $indonesian_ayat = $complete_ayat;
 
         Mail::to($mail_to)->send(new AyatSendMail($indonesian_ayat,$ayat_surat, $arabic_ayat));
-        //return view('ayat.show')->with(compact('indonesian_ayat','ayat_surat','arabic_ayat'));
     }
 
     public function getIndonesian($ayat){
