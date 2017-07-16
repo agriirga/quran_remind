@@ -1,13 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-
-    <h1>{{ $indonesian_ayat }}</h1>
+    <div class = "jumbotron">
+        @foreach($arabic_ayat as $ayat)
+            <h1 align="center">{{$ayat->verse}}</h1>
+        @endforeach
+    </div>
     
-    @foreach($arabic_ayat as $ayat)
-        <h1>{{$ayat->verse}}</h1>
-    @endforeach
-    <br>
-    <h2>{{ $ayat_surat }}</h2>
+    <h1 align= "center">{{ $indonesian_ayat }}</h1>
+    
+    <h2 align = "center">{{ $ayat_surat }}</h2>
     
 @endsection

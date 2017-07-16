@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\Auth;
 class QuranController extends Controller
 {
     public function specificAyat($surat,$ayat, AyatServices $ayat_svc){
-        $user_mail = Auth::user()->email;
+        //$user_mail = Auth::user()->email;
+        $user_id = Auth::user()->id;
         $index_ayat = IndonesianVerse::select('id')->where('surah_id',$surat)->where('ayah_no',$ayat)->first();
-        return $ayat_svc->getSpecificAyat($index_ayat->id, $user_mail,1);
+        return $ayat_svc->getSpecificAyat($index_ayat->id, $user_id,1);
     }
 /*
     public function getSpecificAyat($index)

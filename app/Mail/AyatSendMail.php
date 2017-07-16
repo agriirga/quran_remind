@@ -31,7 +31,7 @@ class AyatSendMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Quran_Reminder')
+        return $this->subject('Quran Reminder:')
             ->view('email.ayat');
     }
 }
